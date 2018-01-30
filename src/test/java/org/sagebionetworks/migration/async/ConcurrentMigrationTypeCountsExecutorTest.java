@@ -1,5 +1,15 @@
 package org.sagebionetworks.migration.async;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeoutException;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,19 +18,9 @@ import org.mockito.MockitoAnnotations;
 import org.sagebionetworks.client.SynapseAdminClient;
 import org.sagebionetworks.migration.AsyncMigrationException;
 import org.sagebionetworks.migration.factory.AsyncMigrationTypeCountsWorkerFactory;
-import org.sagebionetworks.migration.factory.SynapseClientFactory;
-import org.sagebionetworks.repo.model.asynch.AsynchJobState;
-import org.sagebionetworks.repo.model.asynch.AsynchronousJobStatus;
-import org.sagebionetworks.repo.model.migration.*;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.*;
-
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.when;
+import org.sagebionetworks.repo.model.migration.MigrationType;
+import org.sagebionetworks.repo.model.migration.MigrationTypeCount;
+import org.sagebionetworks.repo.model.migration.MigrationTypeCounts;
 
 public class ConcurrentMigrationTypeCountsExecutorTest {
 
@@ -32,12 +32,6 @@ public class ConcurrentMigrationTypeCountsExecutorTest {
     private AsyncMigrationTypeCountsWorker mockSourceWorker;
     @Mock
     private AsyncMigrationTypeCountsWorker mockDestinationWorker;
-/*
-    @Mock
-    private Future<MigrationTypeCounts> mockFutureSourceTypeCounts;
-    @Mock
-    private Future<MigrationTypeCounts> mockFutureDestinationTypeCounts;
-*/
 
     private ExecutorService threadPool;
 
@@ -83,7 +77,7 @@ public class ConcurrentMigrationTypeCountsExecutorTest {
         expectedResult.setSourceResult(l);
         expectedResult.setDestinationResult(l);
 
-        ConcurrentMigrationTypeCountsExecutor executor = new ConcurrentMigrationTypeCountsExecutor(threadPool, mockFactory);
+        ConcurrentMigrationTypeCountsExecutorImpl executor = new ConcurrentMigrationTypeCountsExecutorImpl(threadPool, mockFactory);
 
         // Call under test
         ConcurrentExecutionResult<List<MigrationTypeCount>> concTypeCounts = executor.getMigrationTypeCounts(types);
@@ -106,7 +100,7 @@ public class ConcurrentMigrationTypeCountsExecutorTest {
 
         when(mockSourceWorker.call()).thenThrow(expectedException);
 
-        ConcurrentMigrationTypeCountsExecutor executor = new ConcurrentMigrationTypeCountsExecutor(threadPool, mockFactory);
+        ConcurrentMigrationTypeCountsExecutorImpl executor = new ConcurrentMigrationTypeCountsExecutorImpl(threadPool, mockFactory);
 
         // Call under test
         ConcurrentExecutionResult<List<MigrationTypeCount>> concTypeCounts = executor.getMigrationTypeCounts(types);

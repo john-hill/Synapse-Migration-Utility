@@ -130,14 +130,10 @@ public class MigrationConfigurationImpl implements Configuration {
 		if(!file.exists()) {
 			throw new IllegalArgumentException("The propery file does not exist:"+path);
 		}
-		InputStream fis = null;
-		try{
-			fis = fileProvider.createInputStream(file);
+		try(InputStream fis = fileProvider.createInputStream(file)){
 			Properties props = this.propProvider.createNewProperties();
 			props.load(fis);
 			return props;
-		}finally{
-			fis.close();
 		}
 	}
 	
